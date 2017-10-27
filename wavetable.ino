@@ -8,8 +8,9 @@ extern "C" {
 
 #include <AudioOutputNull.h>
 #include <AudioOutputI2SDAC.h>
-#include <AudioOutputSPIFFSWAV.h>
-#include <AudioFileSourceSPIFFS.h>
+//#include <AudioOutputSPIFFSWAV.h>
+#include <ESP8266FastROMFS.h>
+#include <AudioFileSourceFastROMFS.h>
 
 #define TSF_NO_STDIO
 #define TSF_IMPLEMENTATION
@@ -763,31 +764,38 @@ void AudioGeneratorMIDI::MakeStreamFromAFS(AudioFileSource *src, tsf_stream *afs
 }
 
 
-AudioFileSourceSPIFFS *sf2;
-AudioFileSourceSPIFFS *mid;
-AudioOutputSPIFFSWAV *wav;
+AudioFileSourceFastROMFS *sf2;
+AudioFileSourceFastROMFS *mid;
+//AudioOutputSPIFFSWAV *wav;
 AudioOutputI2SDAC *dac;
 AudioOutputNull *none;
 AudioGeneratorMIDI *midi;
 uint32_t t;
+
+FastROMFilesystem *fs;
+
 void setup()
 {
-  char *soundfont = "/1mgm.sf2";
-  char *midifile = "/furelise.mid";
+  char *soundfont = "1mgm.sf2";
+  char *midifile = "furelise.mid";
 
   WiFi.forceSleepBegin();
 
   Serial.begin(115200);
   Serial.println("Starting up...\n");
 
-  SPIFFS.begin();
+//  SPIFFS.begin();
+  fs = new FastROMFilesystem();
+  fs->mount();
 
-  sf2 = new AudioFileSourceSPIFFS(soundfont);
-  mid = new AudioFileSourceSPIFFS(midifile);
+  sf2 = new AudioFileSourceFastROMFS(fs, soundfont);
+  mid = new AudioFileSourceFastROMFS(fs, midifile);
+  Serial.printf("sf2=%p\nmid=%p\n", sf2, mid);
+  
   none = new AudioOutputNull();
-  wav= new AudioOutputSPIFFSWAV();
+//  wav= new AudioOutputSPIFFSWAV();
   dac = new AudioOutputI2SDAC();
-  wav->SetFilename("/out.wav");
+//  wav->SetFilename("/out.wav");
   
   Serial.printf("Creating AudioGeneratorMIDI...\n");
   midi = new AudioGeneratorMIDI();
@@ -806,7 +814,7 @@ void loop()
     if (!midi->loop()) {
       uint32_t e = millis();
       midi->stop();
-      wav->stop();
+//      wav->stop();
       uint32_t d = e - t;
     Serial.printf("Runtime: %dms, %f percent of realtime", d, (500000.0/44100.0) / (d/1000.0) );
     }

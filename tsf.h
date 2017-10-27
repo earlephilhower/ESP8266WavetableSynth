@@ -1098,10 +1098,10 @@ short tsf_read_short_cached(tsf *f, int pos)
 	}
 	int readOff = pos - (pos % TSF_BUFFSIZE);
 // for (int i=0; i<TSF_BUFFSIZE; i++) { f->buffer[repl][i] = i; }
-//	f->hydra->stream->seek(f->hydra->stream->data, readOff * sizeof(short));
-//	f->hydra->stream->read(f->hydra->stream->data, f->buffer[repl], TSF_BUFFSIZE * sizeof(short));
-static uint32_t *bp = NULL; if (!bp) bp = (uint32_t*)malloc(512);
-printf("off=%08x, buff=%p, len=%08x\n", readOff * sizeof(short), bp, TSF_BUFFSIZE); spi_flash_read(0x0000, bp, 512/4-4) ;
+	f->hydra->stream->seek(f->hydra->stream->data, readOff * sizeof(short));
+	f->hydra->stream->read(f->hydra->stream->data, f->buffer[repl], TSF_BUFFSIZE * sizeof(short));
+//static uint32_t *bp = NULL; if (!bp) bp = (uint32_t*)malloc(512);
+//printf("off=%08x, buff=%p, len=%08x\n", readOff * sizeof(short), bp, TSF_BUFFSIZE); spi_flash_read(0x0000, bp, 512/4-4) ;
 	f->timestamp[repl] = f->epoch++;
 	f->offset[repl] = readOff;
 	misses++;
