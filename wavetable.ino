@@ -674,7 +674,7 @@ bool AudioGeneratorMIDI::loop()
   // Try and stuff the buffer one sample at a time
   do {
 c++;
-if (c==500000) {running = false; return false; }
+//if (c==500000) {running = false; return false; }
 if (c%44100 == 0) yield();
 
 play:
@@ -687,6 +687,7 @@ play:
       numSamplesRendered = sizeof(samplesRendered)/sizeof(samplesRendered[0]);
       if (samplesToPlay < sizeof(samplesRendered)/sizeof(samplesRendered[0])) numSamplesRendered = samplesToPlay;
       tsf_render_short_fast(g_tsf, samplesRendered, numSamplesRendered, 0);
+//      tsf_render_short(g_tsf, samplesRendered, numSamplesRendered, 0);
       lastSample[AudioOutput::LEFTCHANNEL] = samplesRendered[0];
       lastSample[AudioOutput::RIGHTCHANNEL] = samplesRendered[0];
       sentSamplesRendered = 1;
@@ -802,9 +803,9 @@ void setup()
   Serial.printf("Setting Soundfont...\n");
   midi->SetSoundfont(sf2);
   Serial.printf("Setting Samplerate...\n");
-  midi->SetSampleRate(44100);
+  midi->SetSampleRate(22050);
   Serial.printf("BEGIN...\n");
-  midi->begin(mid, none);
+  midi->begin(mid, dac);
 t = millis();
 }
 

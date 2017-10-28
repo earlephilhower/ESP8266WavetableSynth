@@ -225,8 +225,8 @@ typedef char tsf_char20[20];
 #define TSF_FourCCEquals(value1, value2) (value1[0] == value2[0] && value1[1] == value2[1] && value1[2] == value2[2] && value1[3] == value2[3])
 
 // Samples cache, number and sample count
-#define TSF_BUFFS 8
-#define TSF_BUFFSIZE 1024
+#define TSF_BUFFS 16
+#define TSF_BUFFSIZE 512
 
 struct tsf
 {
@@ -1327,7 +1327,8 @@ double adj = 1LL<<32;
       noteGain = tsf_decibelsToGain(v->noteGainDB + (v->modlfo.level * tmpModLfoToVolume));
 
     gainMono = noteGain * v->ampenv.level;
-
+    short gainMonoFP = gainMono * 32767;
+    
     // Update EG.
     tsf_voice_envelope_process(&v->ampenv, blockSamples, f->outSampleRate);
     if (updateModEnv) tsf_voice_envelope_process(&v->modenv, blockSamples, f->outSampleRate);
@@ -1346,7 +1347,9 @@ double adj = 1LL<<32;
 
           short val = tsf_read_short_cached(f, pos);
 
-          *outL++ += val;// * gainMono;
+          int32_t val32 = (int)val * (int)gainMonoFP;
+          
+          *outL++ += val32>>16; //val * gainMono;
 
           // Next sample.
           tmpSourceSamplePositionF32P32 += pitchRatioF32P32;
